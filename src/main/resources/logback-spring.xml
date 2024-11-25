@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+
+    <!-- Rolling file appender configuration -->
+    <!-- ${LOG_FILE} property resolves value from the property logging.file.name in Spring Boot’s external configuration -->
+    <appender name="ROLLING_FILE"
+              class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${LOG_FILE}</file>
+        <encoder
+                class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <!-- date,priority,class,thread, message, newline -->
+            <Pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] ${PID} %-5level %-50logger{40} : %msg%n</Pattern>
+        </encoder>
+        <rollingPolicy
+                class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <!-- ${LOG_PATH} property resolves value from the property logging.file.path in Spring Boot’s external configuration -->
+            <!-- %- increment the log files to 1.2...n -->
+            <!-- rollover daily and when the file reaches its max size -->
+            <fileNamePattern>${LOG_PATH}/archived/log_%d{dd-MM-yyyy}_%i.log
+            </fileNamePattern>
+            <timeBasedFileNamingAndTriggeringPolicy
+                    class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+                <maxFileSize>1MB</maxFileSize>
+            </timeBasedFileNamingAndTriggeringPolicy>
+            <maxHistory>10</maxHistory>
+            <totalSizeCap>50MB</totalSizeCap>
+        </rollingPolicy>
+    </appender>
+
+    <appender name="ASYNC_APPENDER" class="ch.qos.logback.classic.AsyncAppender">
+        <neverBlock>true</neverBlock>
+        <appender-ref ref="ROLLING_FILE"/>
+        <queueSize>5000</queueSize>
+        <discardingThreshold>0</discardingThreshold>
+    </appender>
+
+    <!-- Log levels -->
+    <root level="info">
+        <appender-ref ref="ASYNC_APPENDER" />
+    </root>
+
+</configuration>
